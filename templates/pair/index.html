@@ -3,10 +3,22 @@
 <html>
 <head>
     <title>Pair Stairs</title>
+    <script type="text/javascript">
+    function submit() {
+        var name = document.getElementById('new_programmer_name').value;
+        var link = '/pair/new_programmer/';
+        link += name;
+        window.location.href=link
+    }
+    </script>
 </head>
 <body>
 {% if pair_table %}
     {{ pair_table|safe }}
 {% endif %}
+<input id="new_programmer_name" type="text">
+<a id="new_programmer_link" href=""></a>
+
+<button type="button" onclick="submit()">add</button>
 </body>
 </html>

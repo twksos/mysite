@@ -21,7 +21,7 @@ def prepare_data(request):
     pair_record2.save()
     pair_record3 = Pair(programmer_0=programmer_ada, programmer_1=programmer_van, date=datetime.now())
     pair_record3.save()
-    return HttpResponse('data created')
+    return HttpResponse('data created. <a href="/pair">start</a>')
 
 
 def create_pair_table_title(programmers):
@@ -37,7 +37,11 @@ def create_pair_table_body(programmers):
     for programmer_0 in programmers:
         pair_table_body += '<tr><td>' + programmer_0.name + '</td>'
         for programmer_1 in programmers:
-            pair_table_body += '<td><a href="/pair/'+str(programmer_0.id)+'/'+str(programmer_1.id)+'">' + str(programmer_0.pair_time_with(pair=programmer_1)) + '</a></td>'
+            if programmer_0==programmer_1:
+                pair_table_body += '<td>X</td>'
+                break
+            else:
+                pair_table_body += '<td><a href="/pair/do_pair/'+str(programmer_0.id)+'/'+str(programmer_1.id)+'/">' + str(programmer_0.pair_time_with(pair=programmer_1)) + '</a></td>'
         pair_table_body += '</tr>'
     return pair_table_body
 
@@ -60,3 +64,7 @@ def do_pair(request,programmer_0_id,programmer_1_id):
     programmer_1=Programmer.objects.get(id=programmer_1_id)
     programmer_0.pair_with(programmer_1)
     return index(request)
+
+def new_programmer(request,programmer_name):
+    Programmer(name=programmer_name).save()
+    return HttpResponse(programmer_name+' created. <a href="/pair">start</a>')
