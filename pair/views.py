@@ -25,9 +25,9 @@ def prepare_data(request):
 
 
 def create_pair_table_title(programmers):
-    pair_table = '<tr><th>names</th>'
+    pair_table = '<tr><th width=150 align=left>names</th>'
     for programmer_0 in programmers:
-        pair_table += '<th>' + programmer_0.name + '</th>'
+        pair_table += '<th width=150 align=left>' + programmer_0.name + '</th>'
     pair_table += '</tr>'
     return pair_table
 
@@ -49,7 +49,7 @@ def create_pair_table_body(programmers):
 def index(request):
     all_programmers = Programmer.objects.all()
     template = loader.get_template('pair/index.html')
-    pair_table = '<table>'
+    pair_table = '<table border=1 align=left>'
     pair_table += create_pair_table_title(all_programmers)
     pair_table += create_pair_table_body(all_programmers)
     pair_table += '</table>'
