@@ -2,7 +2,7 @@
 from datetime import datetime
 from django.http import HttpResponse
 from django.template import loader
-from django.template.context import Context
+from django.template.context import Context, RequestContext
 from models import Pair
 from mysite.pair.models import Programmer
 
@@ -21,7 +21,7 @@ def prepare_data(request):
     pair_record2.save()
     pair_record3 = Pair(programmer_0=programmer_ada, programmer_1=programmer_van, date=datetime.now())
     pair_record3.save()
-    return HttpResponse('data created. <a href="/pair">start</a>')
+    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')
 
 
 def create_pair_table_title(programmers):
@@ -38,26 +38,25 @@ def create_pair_table_body(programmers):
         pair_table_body += '<tr><td>' + programmer_0.name + '</td>'
         for programmer_1 in programmers:
             if programmer_0==programmer_1:
-                pair_table_body += '<td>X</td>'
+                pair_table_body += '<td><a href="/pair/delete_programmer/'+str(programmer_0.id)+'">delete</td>'
                 break
             else:
-                pair_table_body += '<td><a href="/pair/do_pair/'+str(programmer_0.id)+'/'+str(programmer_1.id)+'/">' + str(programmer_0.pair_time_with(pair=programmer_1)) + '</a></td>'
+                pair_table_body += '<td><a onclick="do_pair('+str(programmer_0.id)+','+str(programmer_1.id)+')">' + str(programmer_0.pair_time_with(pair=programmer_1)) + '</a></td>'
         pair_table_body += '</tr>'
     return pair_table_body
 
 
 def index(request):
+    return HttpResponse(loader.get_template('pair/index.html').render(RequestContext(request)))
+
+def get_pair_table(request):
     all_programmers = Programmer.objects.all()
-    template = loader.get_template('pair/index.html')
-    pair_table = '<table border=1 align=left>'
+    pair_table = '<table border=1>'
     pair_table += create_pair_table_title(all_programmers)
     pair_table += create_pair_table_body(all_programmers)
     pair_table += '</table>'
 
-    context = Context({
-        'pair_table': pair_table,
-        })
-    return HttpResponse(template.render(context))
+    return HttpResponse(pair_table)
 
 def do_pair(request,programmer_0_id,programmer_1_id):
     programmer_0=Programmer.objects.get(id=programmer_0_id)
@@ -67,4 +66,8 @@ def do_pair(request,programmer_0_id,programmer_1_id):
 
 def new_programmer(request,programmer_name):
     Programmer(name=programmer_name).save()
-    return HttpResponse(programmer_name+' created. <a href="/pair">start</a>')
+    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')
+
+def delete_programmer(request,programmer_id):
+    Programmer.objects.get(id=programmer_id).delete()
+    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')

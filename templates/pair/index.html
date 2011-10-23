@@ -3,22 +3,54 @@
 <html>
 <head>
     <title>Pair Stairs</title>
+    <script type="text/javascript" src="../../media/js/jquery-1.6.4.min.js"></script>
     <script type="text/javascript">
-    function submit() {
-        var name = document.getElementById('new_programmer_name').value;
-        var link = '/pair/new_programmer/';
-        link += name;
-        window.location.href=link
-    }
+        function renew_pair_table() {
+            $.ajax({
+                url: "/pair/get_pair_table",
+                success: function(data) {
+                    $("#pair_table").html(data);
+                }
+            });
+        }
+
+        function do_pair(programmer_0, programmer_1) {
+            $.ajax({
+                url: "/pair/do_pair/" + programmer_0 + "/" + programmer_1,
+                success: function() {
+                    renew_pair_table()
+                }
+            });
+        }
+
+        function new_programmer(programmer_name) {
+            $.ajax({
+                url: "/pair/new_programmer/" + programmer_name,
+                success: function() {
+                    renew_pair_table()
+                }
+            });
+        }
+        $(document).ready(function() {
+            renew_pair_table();
+
+            $('#new_programmer_name').keyup(function () {
+                var len = $(this).val().length
+                var limitation = 6;
+                if(len>limitation)$(this).val($(this).val().substring(0,limitation))
+                $('#counter').html($(this).val().length+'/'+limitation)
+            })
+        })
     </script>
 </head>
 <body>
-{% if pair_table %}
-    {{ pair_table|safe }}
-{% endif %}
-<input id="new_programmer_name" type="text">
-<a id="new_programmer_link" href=""></a>
-
-<button type="button" onclick="submit()">add</button>
+<div id="pair_table">
+</div>
+<hr/>
+<div>
+    <textarea id="new_programmer_name"></textarea>
+    <label id="counter" for="new_programmer_name">0</label>
+    <button id="add_new_programmer" type="button" onclick="new_programmer($('#new_programmer_name').val())">add</button>
+</div>
 </body>
 </html>
