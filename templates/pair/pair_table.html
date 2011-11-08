@@ -1,21 +1,27 @@
 {% load filters %}
-<table border="1">
+<table>
 <thead><tr><th>Programmer</th>
 {% for programmer_0 in all_programmers %}
     <th class="title-name">{{ programmer_0.name }}</th>
 {% endfor %}
 </tr></thead>
 {% for programmer_0 in all_programmers %}
-    <tr><td>{{ programmer_0.name }}</td>
+    <tr><td class="front-name">{{ programmer_0.name }}</td>
     {% for programmer_1 in all_programmers %}
-        <td>
             {% if programmer_0.id > programmer_1.id %}
+            <td>
             <a onclick="{{ programmer_0|pair_with:programmer_1 }}" class="{{ programmer_0.name }} {{ programmer_1.name }} pair_time">{{ programmer_0|pair_time_with:programmer_1 }}</a>
+            </td>
             {% endif %}
             {% if programmer_0.id == programmer_1.id %}
+            <td>
             <a onclick="delete_programmer({{ programmer_0.id }})" class="{{ programmer_0.name }} delete">remove</a>
+            </td>
             {% endif %}
-        </td>
+            {% if programmer_0.id < programmer_1.id %}
+                <td class="useless"></td>
+            {% endif %}
+
     {% endfor %}
 {% endfor %}
     </tr>

@@ -42,6 +42,25 @@
         }
     </script>
     {% endblock %}
+    {% block style %}
+        <style type="text/css">
+            .error{
+                background-color: #FF0000;
+            }
+            .success{
+                background-color: #00FFFF;
+            }
+            .useless{
+                display: none;
+            }
+            th {
+                border: solid 1px #000000;
+            }
+            td {
+                border: solid 1px #000000;
+            }
+        </style>
+    {% endblock %}
 </head>
 <body>
 {% block body %}
