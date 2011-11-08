@@ -1,73 +1,32 @@
-# Create your views here.
-from datetime import datetime
 from django.http import HttpResponse
-from django.template import loader
-from django.template.context import Context, RequestContext
-from models import Pair
+from django.shortcuts import render_to_response, redirect
+from django.template.context import RequestContext
 from mysite.pair.models import Programmer
 
-def prepare_data(request):
-    for programmer in Programmer.objects.all():
-        programmer.delete()
-    programmer_ada = Programmer(name='ada')
-    programmer_ada.save()
-    programmer_van = Programmer(name='van')
-    programmer_van.save()
-    programmer_zoi = Programmer(name='zoi')
-    programmer_zoi.save()
-    pair_record1 = Pair(programmer_0=programmer_ada, programmer_1=programmer_van, date=datetime.now())
-    pair_record1.save()
-    pair_record2 = Pair(programmer_0=programmer_ada, programmer_1=programmer_zoi, date=datetime.now())
-    pair_record2.save()
-    pair_record3 = Pair(programmer_0=programmer_ada, programmer_1=programmer_van, date=datetime.now())
-    pair_record3.save()
-    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')
-
-
-def create_pair_table_title(programmers):
-    pair_table = '<tr><th width=150 align=left>names</th>'
-    for programmer_0 in programmers:
-        pair_table += '<th width=150 align=left>' + programmer_0.name + '</th>'
-    pair_table += '</tr>'
-    return pair_table
-
-
-def create_pair_table_body(programmers):
-    pair_table_body = ''
-    for programmer_0 in programmers:
-        pair_table_body += '<tr><td>' + programmer_0.name + '</td>'
-        for programmer_1 in programmers:
-            if programmer_0==programmer_1:
-                pair_table_body += '<td><a href="/pair/delete_programmer/'+str(programmer_0.id)+'">delete</td>'
-                break
-            else:
-                pair_table_body += '<td><a onclick="do_pair('+str(programmer_0.id)+','+str(programmer_1.id)+')">' + str(programmer_0.pair_time_with(pair=programmer_1)) + '</a></td>'
-        pair_table_body += '</tr>'
-    return pair_table_body
-
-
 def index(request):
-    return HttpResponse(loader.get_template('pair/index.html').render(RequestContext(request)))
+    return render_to_response('pair/index.html',{'all_programmers':Programmer.objects.all},context_instance=RequestContext(request))
 
 def get_pair_table(request):
-    all_programmers = Programmer.objects.all()
-    pair_table = '<table border=1>'
-    pair_table += create_pair_table_title(all_programmers)
-    pair_table += create_pair_table_body(all_programmers)
-    pair_table += '</table>'
-
-    return HttpResponse(pair_table)
+    return render_to_response('pair/pair_table.html',{'all_programmers':Programmer.objects.all})
 
 def do_pair(request,programmer_0_id,programmer_1_id):
     programmer_0=Programmer.objects.get(id=programmer_0_id)
     programmer_1=Programmer.objects.get(id=programmer_1_id)
     programmer_0.pair_with(programmer_1)
-    return index(request)
+    return HttpResponse('<div class="message success">'+programmer_0.name+' and '+programmer_1.name+' paired.</div>')
 
-def new_programmer(request,programmer_name):
-    Programmer(name=programmer_name).save()
-    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')
+def new_programmer(request):
+    if request.POST:
+        if request.POST['new_programmer_name'] !='':
+            Programmer(name=request.POST['new_programmer_name']).save()
+            return redirect('/pair/')
+        else:
+            msg = 'Error:programmer name needed'
+            return render_to_response('pair/index.html',{'all_programmers':Programmer.objects.all,'error_message':msg},context_instance=RequestContext(request))
 
-def delete_programmer(request,programmer_id):
-    Programmer.objects.get(id=programmer_id).delete()
-    return HttpResponse('<script type="text/javascript">window.location.href=/pair/</script>')
+def process_programmer(request,programmer_id):
+    if request.method=='DELETE':
+        programmer = Programmer.objects.get(id=programmer_id)
+        success_msg = 'programmer '+programmer.name+' deleted.'
+        programmer.delete()
+        return HttpResponse('<div class="message success">'+success_msg+'</div>')

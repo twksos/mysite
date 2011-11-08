@@ -2,55 +2,62 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>Pair Stairs</title>
+    <title>Pair Stair</title>
     <script type="text/javascript" src="../../media/js/jquery-1.6.4.min.js"></script>
+    {% block javascript %}
     <script type="text/javascript">
-        function renew_pair_table() {
+        function renew_pair_table(msg) {
             $.ajax({
                 url: "/pair/get_pair_table",
                 success: function(data) {
                     $("#pair_table").html(data);
+                    if(msg)add_success_message(msg)
                 }
             });
         }
-
+        function add_success_message(msg) {
+            $('#add_form').append(msg)
+            setTimeout('remove_message()',5000)
+        }
+        function remove_message() {
+            $('.message.success').remove()
+        }
         function do_pair(programmer_0, programmer_1) {
             $.ajax({
                 url: "/pair/do_pair/" + programmer_0 + "/" + programmer_1,
-                success: function() {
-                    renew_pair_table()
+                success: function(data) {
+                    renew_pair_table(data)
                 }
             });
         }
-
-        function new_programmer(programmer_name) {
+        
+        function delete_programmer(programmer) {
             $.ajax({
-                url: "/pair/new_programmer/" + programmer_name,
-                success: function() {
-                    renew_pair_table()
+                type: "DELETE",
+                url: "/pair/programmer/" + programmer,
+                success: function(data) {
+                    renew_pair_table(data)
                 }
             });
         }
-        $(document).ready(function() {
-            renew_pair_table();
-
-            $('#new_programmer_name').keyup(function () {
-                var len = $(this).val().length
-                var limitation = 6;
-                if(len>limitation)$(this).val($(this).val().substring(0,limitation))
-                $('#counter').html($(this).val().length+'/'+limitation)
-            })
-        })
     </script>
+    {% endblock %}
 </head>
 <body>
+{% block body %}
 <div id="pair_table">
+{% include 'pair/pair_table.html' with all_programmers=all_programmers %}
 </div>
 <hr/>
-<div>
-    <textarea id="new_programmer_name"></textarea>
-    <label id="counter" for="new_programmer_name">0</label>
-    <button id="add_new_programmer" type="button" onclick="new_programmer($('#new_programmer_name').val())">add</button>
+<div id="add_form">
+    <div class="message error">{{ error_message }}</div>
+    <form action="/pair/programmer" method="POST">
+    {% csrf_token %}
+    <label for="new_programmer_name">new programmer name</label>
+    <input id="new_programmer_name" name="new_programmer_name" />
+    <input id="add_new_programmer" type="submit" value="add" />
+    </form>
 </div>
+{% endblock %}
 </body>
 </html>

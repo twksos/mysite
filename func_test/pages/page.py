@@ -5,3 +5,6 @@ class Page(object):
         self.driver = driver
         self.url = self.driver.current_url
         self.driver.implicitly_wait(WAIT)
+
+    def get_title(self):
+        return self.driver.get_title()
